@@ -1,0 +1,130 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Login - Collage Editor{% endblock %}
+
+{% block extra_css %}
+<style>
+    /* Specific styles for the auth pages */
+    .auth-wrapper {
+        display: flex;
+        min-height: 85vh;
+        align-items: center;
+        justify-content: center;
+        padding: 2rem 0;
+    }
+    .auth-card {
+        border: none;
+        border-radius: 1rem;
+        box-shadow: 0 10px 40px rgba(0,0,0,0.1);
+        overflow: hidden; /* Important for keeping the image contained */
+    }
+    .auth-form-section {
+        padding: 3rem;
+    }
+    .auth-graphic-section {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        padding: 3rem;
+        text-align: center;
+    }
+    .auth-graphic-section .icon {
+        font-size: 4rem;
+        margin-bottom: 1rem;
+    }
+    .auth-graphic-section h2 {
+        font-weight: 700;
+    }
+    .form-control-lg {
+        padding: 0.8rem 1rem;
+        font-size: 1rem;
+    }
+    .social-login-divider {
+        display: flex;
+        align-items: center;
+        text-align: center;
+        color: #6c757d;
+        margin: 1.5rem 0;
+    }
+    .social-login-divider::before,
+    .social-login-divider::after {
+        content: '';
+        flex: 1;
+        border-bottom: 1px solid #dee2e6;
+    }
+    .social-login-divider:not(:empty)::before {
+        margin-right: .25em;
+    }
+    .social-login-divider:not(:empty)::after {
+        margin-left: .25em;
+    }
+    .btn-social {
+        width: 100%;
+        margin-bottom: 0.5rem;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.5rem;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="auth-wrapper fade-in">
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-lg-10 col-xl-9">
+                <div class="card auth-card">
+                    <div class="row g-0">
+                        <!-- Left Side: Graphic and Branding -->
+                        <div class="col-md-6 d-none d-md-flex auth-graphic-section">
+                            <div>
+                                <i class="bi bi-grid-3x3-gap-fill icon"></i>
+                                <h2>Welcome Back</h2>
+                                <p class="lead">Sign in to continue managing your beautiful photo collages.</p>
+                            </div>
+                        </div>
+
+                        <!-- Right Side: Login Form -->
+                        <div class="col-md-6 auth-form-section">
+                            <div class="text-center mb-4">
+                                <h3 class="fw-bold">Login to Your Account</h3>
+                                <p class="text-muted">Let's get you signed in.</p>
+                            </div>
+
+                            {% if form.errors %}
+                                <div class="alert alert-danger" role="alert">
+                                    Your username and password didn't match. Please try again.
+                                </div>
+                            {% endif %}
+                            
+                            <form method="post">
+                                {% csrf_token %}
+                                <div class="mb-3">
+                                    <label for="id_username" class="form-label">Username</label>
+                                    <input type="text" name="username" class="form-control form-control-lg" id="id_username" required>
+                                </div>
+                                <div class="mb-3">
+                                    <label for="id_password" class="form-label">Password</label>
+                                    <input type="password" name="password" class="form-control form-control-lg" id="id_password" required>
+                                </div>
+                                <div class="d-grid">
+                                    <button type="submit" class="btn btn-primary btn-lg">Login</button>
+                                </div>
+                            </form>
+
+                            <div class="text-center mt-4">
+                                <p class="text-muted">Don't have an account? <a href="{% url 'accounts:register' %}" class="fw-bold">Register here</a></p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

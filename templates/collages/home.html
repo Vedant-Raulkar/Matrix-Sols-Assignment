@@ -1,0 +1,94 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Dashboard - Collage Editor{% endblock %}
+
+{% block content %}
+<div class="container-fluid px-4 px-lg-5 fade-in">
+
+    <!-- Welcome Header & CTA -->
+    <div class="row justify-content-center text-center my-4 my-lg-5">
+        <div class="col-lg-8">
+            <h1 class="display-5 fw-bold">Welcome back, {{ user.username }}!</h1>
+            <p class="lead text-muted mt-3">Ready to bring your ideas to life? Create a stunning new collage or revisit your recent projects.</p>
+            <div class="d-grid gap-2 d-sm-flex justify-content-sm-center mt-4">
+                <a href="{% url 'collages:create' %}" class="btn btn-primary btn-lg px-4 gap-3">
+                    <i class="bi bi-plus-circle me-2"></i>Create New Collage
+                </a>
+                <a href="{% url 'collages:list' %}" class="btn btn-outline-secondary btn-lg px-4">
+                    <i class="bi bi-collection me-2"></i>View All My Collages
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Recent Collages Section -->
+    <div class="row">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <h3 class="fw-bold mb-0">Your Recent Collages</h3>
+                {% if recent_collages %}
+                <a href="{% url 'collages:list' %}" class="text-decoration-none">View All →</a>
+                {% endif %}
+            </div>
+            <hr class="mt-0 mb-4">
+        </div>
+    </div>
+
+    {% if recent_collages %}
+        <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
+            {% for collage in recent_collages %}
+                <div class="col">
+                    <div class="card h-100">
+                        {% if collage.images.first.image.url %}
+                            <a href="{% url 'collages:detail' collage.pk %}" class="text-decoration-none">
+                                <img src="{{ collage.images.first.image.url }}" class="card-img-top" alt="Preview of {{ collage.title }}">
+                            </a>
+                        {% else %}
+                             <!-- Placeholder for collages with no images -->
+                            <a href="{% url 'collages:detail' collage.pk %}" class="text-decoration-none">
+                                <div class="card-img-top bg-light d-flex align-items-center justify-content-center" style="height: 200px;">
+                                    <i class="bi bi-image-alt text-muted" style="font-size: 3rem;"></i>
+                                </div>
+                            </a>
+                        {% endif %}
+                        <div class="card-body d-flex flex-column">
+                            <h5 class="card-title fw-bold">{{ collage.title }}</h5>
+                            <p class="card-text text-muted small">
+                                <span class="badge bg-secondary me-2">{{ collage.get_layout_type_display }}</span>
+                                Last updated: {{ collage.updated_at|timesince }} ago
+                            </p>
+                            <div class="mt-auto pt-3">
+                                <a href="{% url 'collages:detail' collage.pk %}" class="btn btn-outline-primary w-100">View</a>
+                            </div>
+                        </div>
+                        <div class="card-footer bg-white border-top-0 d-flex justify-content-between align-items-center">
+                            <small class="text-muted">Created: {{ collage.created_at|date:"M d, Y" }}</small>
+                            <div>
+                                <button type="button" class="btn btn-link text-danger p-0" title="Delete"
+                                        data-bs-toggle="modal"
+                                        data-bs-target="#deleteConfirmationModal"
+                                        data-bs-form-action="{% url 'collages:delete' collage.pk %}"
+                                        data-bs-collage-title="{{ collage.title }}">
+                                    <i class="bi bi-trash"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+    {% else %}
+        <!-- Empty State -->
+        <div class="col-12">
+            <div class="text-center py-5 px-4 bg-white rounded-3 shadow-sm">
+                <h4 class="fw-bold">Your canvas is ready</h4>
+                <p class="text-muted">You haven't created any collages yet. Click the button below to start your first masterpiece!</p>
+                <a href="{% url 'collages:create' %}" class="btn btn-primary mt-3">
+                    <i class="bi bi-plus-circle me-1"></i>Start Creating
+                </a>
+            </div>
+        </div>
+    {% endif %}
+</div>
+{% endblock %}

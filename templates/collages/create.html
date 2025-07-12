@@ -1,0 +1,473 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Create New Collage - Collage Editor{% endblock %}
+
+{% block extra_css %}
+<style>
+    /* Styles specific to the creation wizard */
+    .wizard-steps {
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 2rem;
+        position: relative;
+    }
+    .wizard-steps::before {
+        content: '';
+        position: absolute;
+        top: 50%;
+        left: 0;
+        right: 0;
+        height: 2px;
+        background-color: #dee2e6;
+        transform: translateY(-50%);
+        z-index: 1;
+    }
+    .step {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        text-align: center;
+        position: relative;
+        z-index: 2;
+        background-color: #f8f9fa; /* Match body background */
+        padding: 0 1rem;
+    }
+    .step-number {
+        height: 40px;
+        width: 40px;
+        border-radius: 50%;
+        background-color: #dee2e6;
+        color: #6c757d;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: 700;
+        transition: all 0.3s ease;
+        border: 2px solid #dee2e6;
+    }
+    .step-title {
+        margin-top: 0.5rem;
+        font-weight: 600;
+        color: #6c757d;
+        transition: color 0.3s ease;
+    }
+    .step.active .step-number {
+        background-color: #0d6efd;
+        color: #fff;
+        border-color: #0d6efd;
+    }
+    .step.active .step-title {
+        color: #0d6efd;
+    }
+    .step.completed .step-number {
+        background-color: #198754;
+        color: #fff;
+        border-color: #198754;
+    }
+    .step.completed .step-title {
+        color: #198754;
+    }
+
+    /* Image Upload Area */
+    #image-upload-area {
+        border: 2px dashed #dee2e6;
+        border-radius: 0.75rem;
+        padding: 2rem;
+        text-align: center;
+        background-color: #fff;
+        cursor: pointer;
+        transition: all 0.3s ease;
+    }
+    #image-upload-area.drag-over {
+        border-color: #0d6efd;
+        background-color: #e9f3ff;
+    }
+    #image-preview-container {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 1rem;
+        margin-top: 1.5rem;
+    }
+    .img-preview-wrapper {
+        position: relative;
+        width: 120px;
+        height: 120px;
+    }
+    .img-preview {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        border-radius: 0.5rem;
+        border: 2px solid #dee2e6;
+    }
+    .remove-img-btn {
+        position: absolute;
+        top: -5px;
+        right: -5px;
+        width: 24px;
+        height: 24px;
+        background-color: #dc3545;
+        color: white;
+        border: none;
+        border-radius: 50%;
+        font-size: 14px;
+        line-height: 1;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    /* Template Selection */
+    .template-card {
+        cursor: pointer;
+        border: 2px solid transparent;
+        transition: all 0.3s ease;
+    }
+    .template-card.selected {
+        border-color: #0d6efd;
+        box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+        transform: translateY(-5px);
+    }
+    .template-preview {
+        height: 150px; /* Increased height for better preview */
+        background: #f8f9fa;
+        border-radius: 0.5rem;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border: 1px solid #dee2e6;
+        padding: 5px; /* Add some padding */
+    }
+</style>
+{% endblock %}
+
+
+{% block content %}
+<div class="container mt-4 mb-5 fade-in">
+    <div class="row justify-content-center">
+        <div class="col-lg-10">
+
+            <!-- Wizard Steps -->
+            <div class="wizard-steps">
+                <div class="step active" id="step-1">
+                    <div class="step-number">1</div>
+                    <div class="step-title">Details</div>
+                </div>
+                <div class="step" id="step-2">
+                    <div class="step-number">2</div>
+                    <div class="step-title">Upload</div>
+                </div>
+                <div class="step" id="step-3">
+                    <div class="step-number">3</div>
+                    <div class="step-title">Customize</div>
+                </div>
+            </div>
+
+            <form method="post" enctype="multipart/form-data" id="create-collage-form">
+                {% csrf_token %}
+
+                <!-- Step 1: Title -->
+                <div id="form-step-1" class="card shadow-sm">
+                    <div class="card-body p-4 p-md-5">
+                        <h3 class="card-title fw-bold mb-4">Give your collage a name</h3>
+                        <div class="mb-3">
+                            <label for="id_title" class="form-label">Collage Title</label>
+                            <input type="text" name="title" maxlength="255" required class="form-control form-control-lg" id="id_title" placeholder="e.g., 'Our Amazing Trip'">
+                        </div>
+                        <div class="text-end">
+                            <button type="button" class="btn btn-primary btn-lg" onclick="goToStep(2)">Next: Upload Images</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Step 2: Image Upload -->
+                <div id="form-step-2" class="card shadow-sm" style="display: none;">
+                    <div class="card-body p-4 p-md-5">
+                        <h3 class="card-title fw-bold mb-4">Upload your photos</h3>
+                        <div class="mb-3">
+                            <label for="id_images-input" class="form-label">Select Images</label>
+                            <div id="image-upload-area">
+                                <i class="bi bi-cloud-arrow-up fs-1 text-muted"></i>
+                                <p class="mt-2 mb-0"><b>Click to browse</b> or drag and drop images here.</p>
+                                <small class="text-danger">Select 2 to 10 images only (PNG, JPG).</small>
+                            </div>
+                            <input type="file" name="images" accept="image/*" multiple required class="form-control" id="id_images-input" style="display: none;">
+                        </div>
+                        <div id="image-preview-container"></div>
+                        <div class="d-flex justify-content-between mt-4">
+                            <button type="button" class="btn btn-secondary btn-lg" onclick="goToStep(1)">Back</button>
+                            <button type="button" class="btn btn-primary btn-lg" id="upload-next-btn" onclick="goToStep(3)" disabled>Next: Customize</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Step 3: Template and Style -->
+                <div id="form-step-3" class="card shadow-sm" style="display: none;">
+                    <div class="card-body p-4 p-md-5">
+                        <h3 class="card-title fw-bold mb-4">Choose a layout and style</h3>
+                        <div class="mb-4" id="template-selection">
+                            <label class="form-label h5">Available Templates</label>
+                            <div class="row" id="template-grid">
+                                <!-- Templates will be populated here by JS -->
+                            </div>
+                            <input type="hidden" name="template_id" id="selected_template">
+                        </div>
+
+                        <div class="mb-4">
+                            <label for="id_frame_style" class="form-label h5">Frame Style</label>
+                            <select name="frame_style" class="form-select form-select-lg" id="id_frame_style">
+                                <option value="modern">Modern (Clean & Simple)</option>
+                                <option value="classic">Classic (Elegant Borders)</option>
+                                <option value="minimal">Minimal (No Borders)</option>
+                                <option value="vintage">Vintage (Aged Look)</option>
+                            </select>
+                        </div>
+
+                        <div class="d-flex justify-content-between mt-5">
+                            <button type="button" class="btn btn-secondary btn-lg" onclick="goToStep(2)">Back</button>
+                            <button type="submit" class="btn btn-success btn-lg">
+                                <i class="bi bi-check-circle me-2"></i>Create Collage
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const formSteps = [
+        document.getElementById('form-step-1'),
+        document.getElementById('form-step-2'),
+        document.getElementById('form-step-3')
+    ];
+    const wizardSteps = [
+        document.getElementById('step-1'),
+        document.getElementById('step-2'),
+        document.getElementById('step-3')
+    ];
+    const titleInput = document.getElementById('id_title');
+    const fileInput = document.getElementById('id_images-input');
+    const uploadArea = document.getElementById('image-upload-area');
+    const previewContainer = document.getElementById('image-preview-container');
+    const uploadNextBtn = document.getElementById('upload-next-btn');
+
+    let currentStep = 1;
+    let uploadedFiles = [];
+
+    window.goToStep = function(step) {
+        if (step === 2 && titleInput.value.trim() === '') {
+            alert('Please enter a collage title first.');
+            titleInput.focus();
+            return;
+        }
+
+        formSteps[currentStep - 1].style.display = 'none';
+        wizardSteps[currentStep - 1].classList.remove('active');
+        if (step > currentStep) {
+            wizardSteps[currentStep - 1].classList.add('completed');
+        }
+
+        formSteps[step - 1].style.display = 'block';
+        wizardSteps[step - 1].classList.add('active');
+        currentStep = step;
+
+        if (currentStep === 3) {
+            showTemplates();
+        }
+    };
+
+    uploadArea.addEventListener('click', () => fileInput.click());
+    uploadArea.addEventListener('dragover', (e) => { e.preventDefault(); uploadArea.classList.add('drag-over'); });
+    uploadArea.addEventListener('dragleave', () => uploadArea.classList.remove('drag-over'));
+    uploadArea.addEventListener('drop', (e) => {
+        e.preventDefault();
+        uploadArea.classList.remove('drag-over');
+        handleFiles(e.dataTransfer.files);
+    });
+    fileInput.addEventListener('change', () => handleFiles(fileInput.files));
+
+    function handleFiles(files) {
+        for (const file of files) {
+            if (uploadedFiles.length < 15 && file.type.startsWith('image/')) {
+                uploadedFiles.push(file);
+            }
+        }
+        updateFileInput();
+        renderPreviews();
+    }
+
+    function renderPreviews() {
+        previewContainer.innerHTML = '';
+        uploadedFiles.forEach((file, index) => {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const wrapper = document.createElement('div');
+                wrapper.className = 'img-preview-wrapper';
+                wrapper.innerHTML = `
+                    <img src="${e.target.result}" class="img-preview" alt="Preview">
+                    <button type="button" class="remove-img-btn" onclick="removeImage(${index})">×</button>
+                `;
+                previewContainer.appendChild(wrapper);
+            };
+            reader.readAsDataURL(file);
+        });
+        validateUploadStep();
+    }
+
+    window.removeImage = function(index) {
+        uploadedFiles.splice(index, 1);
+        updateFileInput();
+        renderPreviews();
+    };
+
+    function updateFileInput() {
+        const dataTransfer = new DataTransfer();
+        uploadedFiles.forEach(file => dataTransfer.items.add(file));
+        fileInput.files = dataTransfer.files;
+    }
+    
+    function validateUploadStep() {
+        const count = uploadedFiles.length;
+        uploadNextBtn.disabled = !(count >= 2 && count <= 15);
+    }
+
+    // ========================================================================
+    // HIGH-FIDELITY TEMPLATE PREVIEW LOGIC
+    // ========================================================================
+
+    const templates = {
+        2: [
+            {id: 'template_2_1', name: 'Horizontal Split'},
+            {id: 'template_2_2', name: 'Vertical Split'},
+        ],
+        3: [
+            {id: 'template_3_1', name: 'Top Bar'},
+            {id: 'template_3_2', name: 'Side Bar'},
+            {id: 'template_3_3', name: 'Vertical Trio'},
+        ],
+        4: [
+            {id: 'template_4_1', name: 'Classic 2x2 Grid'},
+            {id: 'template_4_2', name: 'Main and Side'},
+            {id: 'template_4_3', name: 'Horizontal Strip'},
+        ],
+        5: [
+            {id: 'template_5_1', name: 'The Cross'},
+            {id: 'template_5_2', name: 'Advanced Grid'},
+        ],
+        6: [
+            {id: 'template_6_1', name: '2x3 Grid'},
+            {id: 'template_6_2', name: 'Mosaic'},
+        ],
+        7: [
+            {id: 'template_7_1', name: 'Featured Mosaic'},
+            {id: 'template_7_2', name: 'Banner and Grid'},
+        ],
+        8: [
+            {id: 'template_8_1', name: '4x2 Grid'},
+            {id: 'template_8_2', name: 'Side Feature'},
+        ],
+        9: [
+            {id: 'template_9_1', name: 'Classic 3x3 Grid'},
+            {id: 'template_9_2', name: 'Center Stage'},
+        ],
+        10: [
+            {id: 'template_10_1', name: '5x2 Grid'},
+            {id: 'template_10_2', name: 'Headline Grid'},
+        ]
+    };
+
+    function showTemplates() {
+        const templateGrid = document.getElementById('template-grid');
+        const imageCount = uploadedFiles.length;
+        templateGrid.innerHTML = ''; // Clear previous templates
+        const availableTemplates = templates[imageCount] || [];
+
+        if (availableTemplates.length === 0 && imageCount > 1) {
+             templateGrid.innerHTML = `<p class="text-muted col-12">We don't have a specific layout for ${imageCount} images yet. A standard vertical layout will be used. You can go back and choose a different number of images for more layout options.</p>`;
+            // Create a default fallback template
+            const defaultTemplate = { id: `template_${imageCount}_default`, name: 'Default Stack' };
+            availableTemplates.push(defaultTemplate);
+        }
+
+        availableTemplates.forEach((template, index) => {
+            const col = document.createElement('div');
+            // Make columns wider for better viewing
+            col.className = 'col-md-6 col-lg-4 mb-4'; 
+            col.innerHTML = `
+                <div class="card template-card h-100" onclick="selectTemplate('${template.id}', this)">
+                    <div class="card-body d-flex flex-column">
+                        <div class="template-preview mb-3 flex-grow-1">${generatePreview(template.id, imageCount)}</div>
+                        <h6 class="card-title text-center mb-0 small fw-bold">${template.name}</h6>
+                    </div>
+                </div>
+            `;
+            templateGrid.appendChild(col);
+            // Auto-select the first template
+            if (index === 0) {
+                selectTemplate(template.id, col.querySelector('.template-card'));
+            }
+        });
+    }
+
+    window.selectTemplate = function(templateId, element) {
+        document.querySelectorAll('.template-card').forEach(card => card.classList.remove('selected'));
+        element.classList.add('selected');
+        document.getElementById('selected_template').value = templateId;
+    };
+
+    function generatePreview(templateId, numImages) {
+        const colors = ['#0d6efd', '#6c757d', '#198754', '#dc3545', '#ffc107', '#0dcaf0', '#6610f2', '#fd7e14', '#20c997', '#d63384', '#6f42c1', '#212529', '#198754', '#adb5bd', '#fd7e14'];
+        let html = '';
+        const baseStyle = 'display: grid; gap: 3px; width: 100%; height: 100%;';
+        const cell = (i) => `<div style="background-color: ${colors[i % colors.length]}; border-radius: 4px;"></div>`;
+        const cellSpan = (i, gridArea) => `<div style="grid-area: ${gridArea}; background-color: ${colors[i % colors.length]}; border-radius: 4px;"></div>`;
+        let cells = '';
+
+        switch(templateId) {
+            // Existing Templates 2-6
+            case 'template_2_1': html = `<div style="${baseStyle} grid-template-columns: 1fr 1fr;">${cell(0)}${cell(1)}</div>`; break;
+            case 'template_2_2': html = `<div style="${baseStyle} grid-template-rows: 1fr 1fr;">${cell(0)}${cell(1)}</div>`; break;
+            case 'template_3_1': html = `<div style="${baseStyle} grid-template-columns: 1fr 1fr; grid-template-rows: 1fr 1fr; grid-template-areas: 'a b' 'c c';">${cellSpan(0, 'a')}${cellSpan(1, 'b')}${cellSpan(2, 'c')}</div>`; break;
+            case 'template_3_2': html = `<div style="${baseStyle} grid-template-columns: 2fr 1fr; grid-template-rows: 1fr 1fr; grid-template-areas: 'a b' 'a c';">${cellSpan(0, 'a')}${cellSpan(1, 'b')}${cellSpan(2, 'c')}</div>`; break;
+            case 'template_3_3': html = `<div style="${baseStyle} grid-template-rows: 1fr 1fr 1fr;">${cell(0)}${cell(1)}${cell(2)}</div>`; break;
+            case 'template_4_1': html = `<div style="${baseStyle} grid-template-columns: 1fr 1fr; grid-template-rows: 1fr 1fr;">${[...Array(4).keys()].map(cell).join('')}</div>`; break;
+            case 'template_4_2': html = `<div style="${baseStyle} grid-template-columns: 1fr 1fr 1fr; grid-template-rows: 2fr 1fr; grid-template-areas: 'a a b' 'c d b';">${cellSpan(0, 'a')}${cellSpan(1, 'b')}${cellSpan(2, 'c')}${cellSpan(3, 'd')}</div>`; break;
+            case 'template_4_3': html = `<div style="${baseStyle} grid-template-columns: 1fr 1fr 1fr 1fr;">${[...Array(4).keys()].map(cell).join('')}</div>`; break;
+            case 'template_5_1': html = `<div style="${baseStyle} grid-template-columns: 1fr 2fr 1fr; grid-template-rows: 1fr 2fr 1fr; grid-template-areas: '. a .' 'b c d' '. e .';">${cellSpan(0, 'a')}${cellSpan(1, 'b')}${cellSpan(2, 'c')}${cellSpan(3, 'd')}${cellSpan(4, 'e')}</div>`; break;
+            case 'template_5_2': html = `<div style="${baseStyle} grid-template-columns: 1fr 1fr 1fr; grid-template-rows: 1fr 1fr 1fr; grid-template-areas: 'a a b' 'c d b' 'c e e';">${cellSpan(0, 'a')}${cellSpan(1, 'b')}${cellSpan(2, 'c')}${cellSpan(3, 'd')}${cellSpan(4, 'e')}</div>`; break;
+            case 'template_6_1': html = `<div style="${baseStyle} grid-template-columns: 1fr 1fr; grid-template-rows: 1fr 1fr 1fr;">${[...Array(6).keys()].map(cell).join('')}</div>`; break;
+            case 'template_6_2': html = `<div style="${baseStyle} grid-template-columns: 2fr 1fr 1fr; grid-template-rows: 1fr 1fr 1fr; grid-template-areas: 'a a b' 'c d e' 'c f g';">${cellSpan(0, 'a')}${cellSpan(1, 'b')}${cellSpan(2, 'c')}${cellSpan(3, 'd')}${cellSpan(4, 'e')}${cellSpan(5, 'f')}${cellSpan(6, 'g')}</div>`; break;
+            
+            // New Templates 7-10
+            case 'template_7_1': html = `<div style="${baseStyle} grid-template-columns: 1fr 1fr 2fr; grid-template-rows: 1fr 1fr 1fr; grid-template-areas: 'a b c' 'd e c' 'f g c';">${cellSpan(0,'a')}${cellSpan(1,'b')}${cellSpan(2,'c')}${cellSpan(3,'d')}${cellSpan(4,'e')}${cellSpan(5,'f')}${cellSpan(6,'g')}</div>`; break;
+            case 'template_7_2': html = `<div style="${baseStyle} grid-template-columns: repeat(3, 1fr); grid-template-rows: 1fr 2fr 2fr; grid-template-areas: 'a a a' 'b c d' 'e f g';">${cellSpan(0,'a')}${cellSpan(1,'b')}${cellSpan(2,'c')}${cellSpan(3,'d')}${cellSpan(4,'e')}${cellSpan(5,'f')}${cellSpan(6,'g')}</div>`; break;
+            case 'template_8_1': html = `<div style="${baseStyle} grid-template-columns: repeat(4, 1fr); grid-template-rows: repeat(2, 1fr);">${[...Array(8).keys()].map(cell).join('')}</div>`; break;
+            case 'template_8_2': html = `<div style="${baseStyle} grid-template-columns: 2fr 1fr 1fr; grid-template-rows: repeat(3, 1fr); grid-template-areas: 'a b c' 'a d e' 'a f g';">${cellSpan(0,'a')}${cellSpan(1,'b')}${cellSpan(2,'c')}${cellSpan(3,'d')}${cellSpan(4,'e')}${cellSpan(5,'f')}${cellSpan(6,'g')}${cellSpan(7,'h')}</div>`; break;
+            case 'template_9_1': html = `<div style="${baseStyle} grid-template-columns: repeat(3, 1fr); grid-template-rows: repeat(3, 1fr);">${[...Array(9).keys()].map(cell).join('')}</div>`; break;
+            case 'template_9_2': html = `<div style="${baseStyle} grid-template-columns: 1fr 2fr 1fr; grid-template-rows: 1fr 2fr 1fr; grid-template-areas: 'a b c' 'd e f' 'g h i';">${cellSpan(0,'a')}${cellSpan(1,'b')}${cellSpan(2,'c')}${cellSpan(3,'d')}${cellSpan(4,'e')}${cellSpan(5,'f')}${cellSpan(6,'g')}${cellSpan(7,'h')}${cellSpan(8,'i')}</div>`; break;
+            case 'template_10_1': html = `<div style="${baseStyle} grid-template-columns: repeat(5, 1fr); grid-template-rows: repeat(2, 1fr);">${[...Array(10).keys()].map(cell).join('')}</div>`; break;
+            case 'template_10_2': html = `<div style="${baseStyle} grid-template-columns: repeat(4, 1fr); grid-template-rows: 2fr 1fr 1fr; grid-template-areas: 'a a b b' 'c d e f' 'g h i j';">${[...Array(10).keys()].map((_,i)=>cellSpan(i, String.fromCharCode(97+i))).join('')}</div>`; break;
+
+            default:
+                // Fallback for default stacked layout
+                cells = '';
+                for (let i = 0; i < numImages; i++) {
+                    cells += cell(i);
+                }
+                html = `<div style="${baseStyle} grid-template-rows: repeat(${numImages}, 1fr);">${cells}</div>`;
+                break;
+        }
+        return html;
+    }
+});
+</script>
+{% endblock %}

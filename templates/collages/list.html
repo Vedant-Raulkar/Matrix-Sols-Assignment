@@ -1,0 +1,153 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}My Collages - Collage Editor{% endblock %}
+
+{% block content %}
+<div class="container-fluid px-4 px-lg-5 fade-in">
+
+    <!-- Page Header -->
+    <div class="row align-items-center mb-4">
+        <div class="col-md-6">
+            <h1 class="fw-bold mb-0">My Collages</h1>
+            <p class="text-muted mb-2 mb-md-0">Browse, search, and manage all of your creations.</p>
+        </div>
+        <div class="col-md-6 text-md-end">
+            <a href="{% url 'collages:create' %}" class="btn btn-primary">
+                <i class="bi bi-plus-circle me-2"></i>Create New Collage
+            </a>
+        </div>
+    </div>
+
+    <!-- Search and Filter Bar -->
+    <div class="card shadow-sm mb-4">
+        <div class="card-body">
+            <form method="get" class="row g-3 align-items-center">
+                <div class="col-md-8">
+                    <div class="search-box">
+                        <input type="text" name="search" class="form-control form-control-lg" placeholder="Search by title, e.g., 'Summer Vacation'" value="{{ search_query }}">
+                        <button class="search-btn" type="submit" aria-label="Search">
+                            <i class="bi bi-search"></i>
+                        </button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Collage Grid -->
+    {% if page_obj.object_list %}
+        <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
+            {% for collage in page_obj.object_list %}
+                <div class="col">
+                    <!-- Using the same professional card design from home.html for consistency -->
+                    <div class="card h-100">
+                        {% if collage.images.first.image.url %}
+                            <a href="{% url 'collages:detail' collage.pk %}" class="text-decoration-none">
+                                <img src="{{ collage.images.first.image.url }}" class="card-img-top" alt="Preview of {{ collage.title }}">
+                            </a>
+                        {% else %}
+                            <a href="{% url 'collages:detail' collage.pk %}" class="text-decoration-none">
+                                <div class="card-img-top bg-light d-flex align-items-center justify-content-center" style="height: 200px;">
+                                    <i class="bi bi-image-alt text-muted" style="font-size: 3rem;"></i>
+                                </div>
+                            </a>
+                        {% endif %}
+                        <div class="card-body d-flex flex-column">
+                            <h5 class="card-title fw-bold">{{ collage.title }}</h5>
+                            <p class="card-text text-muted small">
+                                <span class="badge bg-secondary me-2">{{ collage.get_layout_type_display }}</span>
+                                Last updated: {{ collage.updated_at|timesince }} ago
+                            </p>
+                            <div class="mt-auto pt-3">
+                                <a href="{% url 'collages:detail' collage.pk %}" class="btn btn-outline-primary w-100">View</a>
+                            </div>
+                        </div>
+                        <div class="card-footer bg-white border-top-0 d-flex justify-content-between align-items-center">
+                            <small class="text-muted">Created: {{ collage.created_at|date:"M d, Y" }}</small>
+                            <div>
+                                <button type="button" class="btn btn-link text-danger p-0" title="Delete"
+                                        data-bs-toggle="modal"
+                                        data-bs-target="#deleteConfirmationModal"
+                                        data-bs-form-action="{% url 'collages:delete' collage.pk %}"
+                                        data-bs-collage-title="{{ collage.title }}">
+                                    <i class="bi bi-trash"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+    {% else %}
+        <!-- Enhanced Empty State for search results -->
+        <div class="text-center py-5 px-4 bg-white rounded-3 shadow-sm">
+            <h4 class="fw-bold">No Collages Found</h4>
+            {% if search_query %}
+                <p class="text-muted">Your search for "{{ search_query }}" did not match any collages. Try a different search term.</p>
+                <a href="{% url 'collages:list' %}" class="btn btn-primary mt-3">Clear Search</a>
+            {% else %}
+                <p class="text-muted">You haven't created any collages yet. Let's get started!</p>
+                <a href="{% url 'collages:create' %}" class="btn btn-primary mt-3">
+                    <i class="bi bi-plus-circle me-1"></i>Create Your First Collage
+                </a>
+            {% endif %}
+        </div>
+    {% endif %}
+
+    <!-- Pagination -->
+    {% if page_obj.has_other_pages %}
+        <nav aria-label="Collage pagination" class="mt-5 d-flex justify-content-center">
+            <ul class="pagination">
+                {% if page_obj.has_previous %}
+                    <li class="page-item">
+                        <a class="page-link" href="?page=1&search={{ search_query }}&layout={{ request.GET.layout }}" aria-label="First">
+                            <i class="bi bi-chevron-double-left"></i>
+                        </a>
+                    </li>
+                    <li class="page-item">
+                        <a class="page-link" href="?page={{ page_obj.previous_page_number }}&search={{ search_query }}&layout={{ request.GET.layout }}" aria-label="Previous">
+                            <i class="bi bi-chevron-left"></i>
+                        </a>
+                    </li>
+                {% else %}
+                    <li class="page-item disabled">
+                        <span class="page-link"><i class="bi bi-chevron-double-left"></i></span>
+                    </li>
+                    <li class="page-item disabled">
+                        <span class="page-link"><i class="bi bi-chevron-left"></i></span>
+                    </li>
+                {% endif %}
+
+                {% for num in page_obj.paginator.page_range %}
+                    {% if page_obj.number == num %}
+                        <li class="page-item active" aria-current="page"><span class="page-link">{{ num }}</span></li>
+                    {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
+                        <li class="page-item"><a class="page-link" href="?page={{ num }}&search={{ search_query }}&layout={{ request.GET.layout }}">{{ num }}</a></li>
+                    {% endif %}
+                {% endfor %}
+
+                {% if page_obj.has_next %}
+                    <li class="page-item">
+                        <a class="page-link" href="?page={{ page_obj.next_page_number }}&search={{ search_query }}&layout={{ request.GET.layout }}" aria-label="Next">
+                            <i class="bi bi-chevron-right"></i>
+                        </a>
+                    </li>
+                    <li class="page-item">
+                        <a class="page-link" href="?page={{ page_obj.paginator.num_pages }}&search={{ search_query }}&layout={{ request.GET.layout }}" aria-label="Last">
+                            <i class="bi bi-chevron-double-right"></i>
+                        </a>
+                    </li>
+                {% else %}
+                    <li class="page-item disabled">
+                        <span class="page-link"><i class="bi bi-chevron-right"></i></span>
+                    </li>
+                     <li class="page-item disabled">
+                        <span class="page-link"><i class="bi bi-chevron-double-right"></i></span>
+                    </li>
+                {% endif %}
+            </ul>
+        </nav>
+    {% endif %}
+</div>
+{% endblock %}

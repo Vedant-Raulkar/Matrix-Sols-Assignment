@@ -1,0 +1,147 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load widget_tweaks %}  <!-- Load the new package -->
+
+{% block title %}Create Account - Collage Editor{% endblock %}
+
+{% block extra_css %}
+<style>
+    /* Styles are identical to login.html for consistency */
+    .auth-wrapper {
+        display: flex;
+        min-height: 85vh;
+        align-items: center;
+        justify-content: center;
+        padding: 2rem 0;
+    }
+    .auth-card {
+        border: none;
+        border-radius: 1rem;
+        box-shadow: 0 10px 40px rgba(0,0,0,0.1);
+        overflow: hidden;
+    }
+    .auth-form-section {
+        padding: 2rem 3rem; /* Adjusted padding */
+    }
+    .auth-graphic-section {
+        background: linear-gradient(135deg, #0d6efd 0%, #6610f2 100%);
+        color: white;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        padding: 3rem;
+        text-align: center;
+    }
+    .auth-graphic-section .icon {
+        font-size: 4rem;
+        margin-bottom: 1rem;
+    }
+    .auth-graphic-section h2 {
+        font-weight: 700;
+    }
+    .form-control-lg {
+        padding: 0.8rem 1rem;
+        font-size: 1rem;
+    }
+    .social-login-divider {
+        display: flex;
+        align-items: center;
+        text-align: center;
+        color: #6c757d;
+        margin: 1.5rem 0;
+    }
+    .social-login-divider::before,
+    .social-login-divider::after {
+        content: '';
+        flex: 1;
+        border-bottom: 1px solid #dee2e6;
+    }
+    .social-login-divider:not(:empty)::before { margin-right: .25em; }
+    .social-login-divider:not(:empty)::after { margin-left: .25em; }
+    .btn-social {
+        width: 100%;
+        margin-bottom: 0.5rem;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.5rem;
+    }
+    /* Style for our new, clean help text */
+    .form-help-text {
+        font-size: 0.875em;
+        color: #6c757d;
+        margin-top: 0.25rem;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="auth-wrapper fade-in">
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-lg-10 col-xl-9">
+                <div class="card auth-card">
+                    <div class="row g-0">
+                        <!-- Left Side: Graphic and Branding -->
+                        <div class="col-md-6 d-none d-md-flex auth-graphic-section">
+                            <div>
+                                <i class="bi bi-person-plus-fill icon"></i>
+                                <h2>Join Our Community</h2>
+                                <p class="lead">Create an account to start building and sharing your amazing collages with the world.</p>
+                            </div>
+                        </div>
+
+                        <!-- Right Side: Registration Form -->
+                        <div class="col-md-6 auth-form-section">
+                            <div class="text-center mb-4">
+                                <h3 class="fw-bold">Create Your Account</h3>
+                                <p class="text-muted">It's free and only takes a minute.</p>
+                            </div>
+
+                            <form method="post">
+                                {% csrf_token %}
+                                
+                                <!-- ====================================================== -->
+                                <!-- THIS IS THE NEW, PROFESSIONALLY RENDERED FORM -->
+                                <!-- ====================================================== -->
+                                {% for field in form %}
+                                <div class="mb-3">
+                                    <label for="{{ field.id_for_label }}" class="form-label">{{ field.label }}</label>
+
+                                    <!-- Use widget_tweaks to add classes and handle errors -->
+                                    {% if field.errors %}
+                                        {% render_field field class="form-control form-control-lg is-invalid" placeholder=field.label %}
+                                        {% for error in field.errors %}
+                                            <div class="invalid-feedback d-block">
+                                                {{ error }}
+                                            </div>
+                                        {% endfor %}
+                                    {% else %}
+                                        {% render_field field class="form-control form-control-lg" placeholder=field.label %}
+                                    {% endif %}
+
+                                    <!-- Render help text cleanly without ugly bullet points -->
+                                    {% if field.help_text %}
+                                        <div class="form-help-text">{{ field.help_text|safe }}</div>
+                                    {% endif %}
+                                </div>
+                                {% endfor %}
+                                <!-- ====================================================== -->
+
+                                <div class="d-grid mt-4">
+                                    <button type="submit" class="btn btn-primary btn-lg">Create Account</button>
+                                </div>
+                            </form>
+
+                            <div class="text-center mt-4">
+                                <p class="text-muted">Already have an account? <a href="{% url 'accounts:login' %}" class="fw-bold">Login here</a></p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,35 @@
+{% extends 'base.html' %}
+
+{% block title %}Delete {{ collage.title }} - Collage Editor{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header bg-danger text-white">
+                    <h4 class="text-center mb-0">
+                        <i class="bi bi-exclamation-triangle"></i> Confirm Delete
+                    </h4>
+                </div>
+                <div class="card-body">
+                    <p class="text-center">Are you sure you want to delete the collage <strong>"{{ collage.title }}"</strong>?</p>
+                    <p class="text-center text-muted">This action cannot be undone.</p>
+                    
+                    <div class="d-flex justify-content-center gap-3">
+                        <form method="post" class="d-inline">
+                            {% csrf_token %}
+                            <button type="submit" class="btn btn-danger">
+                                <i class="bi bi-trash"></i> Delete
+                            </button>
+                        </form>
+                        <a href="{% url 'collages:detail' collage.pk %}" class="btn btn-secondary">
+                            <i class="bi bi-arrow-left"></i> Cancel
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

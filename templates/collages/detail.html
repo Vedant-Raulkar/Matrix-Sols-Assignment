@@ -1,0 +1,275 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ collage.title }} - Collage Editor{% endblock %}
+
+{% block extra_css %}
+<style>
+    .collage-container {
+        position: relative;
+        margin-bottom: 20px;
+        background: white;
+        box-shadow: 0 8px 32px rgba(0,0,0,0.1);
+        border-radius: 12px;
+        overflow: hidden;
+    }
+    
+    .collage-template {
+        padding: 8px; /* Consistent padding */
+        display: grid;
+        gap: 8px;
+        min-height: 400px;
+        /* Default fallback for unsupported templates */
+        grid-template-columns: 1fr;
+        grid-auto-rows: 1fr;
+    }
+    
+    .image-slot {
+        position: relative;
+        overflow: hidden;
+        border-radius: 8px;
+    }
+    
+    .image-slot img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        transition: transform 0.3s ease;
+    }
+    
+    .image-slot:hover img {
+        transform: scale(1.05);
+    }
+    
+    .image-caption {
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        background: linear-gradient(transparent, rgba(0,0,0,0.8));
+        color: white;
+        padding: 15px 10px 10px;
+        font-size: 0.9em;
+        transform: translateY(100%);
+        transition: transform 0.3s ease;
+    }
+    
+    .image-slot:hover .image-caption {
+        transform: translateY(0);
+    }
+    
+    /* ======================================================================== */
+    /* TEMPLATE LAYOUTS (EXISTING AND NEW) */
+    /* ======================================================================== */
+
+    /* 2 Image Templates */
+    [data-template="template_2_1"] { grid-template-columns: 1fr 1fr; }
+    [data-template="template_2_2"] { grid-template-rows: 1fr 1fr; }
+    
+    /* 3 Image Templates */
+    [data-template="template_3_1"] { grid-template-columns: 1fr 1fr; grid-template-rows: 1fr 1fr; }
+    [data-template="template_3_1"] .slot-3 { grid-column: span 2; }
+    [data-template="template_3_2"] { grid-template-columns: 2fr 1fr; grid-template-rows: 1fr 1fr; }
+    [data-template="template_3_2"] .slot-1 { grid-row: span 2; }
+    [data-template="template_3_3"] { grid-template-rows: 1fr 1fr 1fr; }
+    
+    /* 4 Image Templates */
+    [data-template="template_4_1"] { grid-template-columns: 1fr 1fr; grid-template-rows: 1fr 1fr; }
+    [data-template="template_4_2"] { grid-template-columns: 1fr 2fr; grid-template-rows: 1fr 1fr 1fr; }
+    [data-template="template_4_2"] .slot-1 { grid-row: span 3; }
+    [data-template="template_4_3"] { grid-template-columns: 1fr 1fr 1fr 1fr; }
+    
+    /* 5 Image Templates */
+    [data-template="template_5_1"] { grid-template-columns: 1fr 2fr 1fr; grid-template-rows: 1fr 2fr 1fr; }
+    [data-template="template_5_1"] .slot-1 { grid-column: 2 / 3; }
+    [data-template="template_5_1"] .slot-2 { grid-column: 1 / 2; grid-row: 2 / 3; }
+    [data-template="template_5_1"] .slot-3 { grid-column: 2 / 3; grid-row: 2 / 3; }
+    [data-template="template_5_1"] .slot-4 { grid-column: 3 / 4; grid-row: 2 / 3; }
+    [data-template="template_5_1"] .slot-5 { grid-column: 2 / 3; grid-row: 3 / 4; }
+    [data-template="template_5_2"] { grid-template-columns: 1fr 1fr 1fr; grid-template-rows: 1fr 1fr 1fr; }
+    [data-template="template_5_2"] .slot-1 { grid-column: span 2; }
+    [data-template="template_5_2"] .slot-3 { grid-row: span 2; }
+    [data-template="template_5_2"] .slot-5 { grid-column: span 2; }
+
+    /* 6 Image Templates */
+    [data-template="template_6_1"] { grid-template-columns: 1fr 1fr; grid-template-rows: 1fr 1fr 1fr; }
+    [data-template="template_6_2"] { grid-template-columns: 2fr 1fr 1fr; grid-template-rows: 1fr 1fr 1fr; }
+    [data-template="template_6_2"] .slot-1 { grid-row: span 2; }
+    [data-template="template_6_2"] .slot-4 { grid-column: span 2; }
+
+    /* 7 Image Templates */
+    [data-template="template_7_1"] { grid-template-columns: 2fr 1fr 1fr; grid-template-rows: 1fr 1fr 1fr; }
+    [data-template="template_7_1"] .slot-1 { grid-row: span 3; }
+    [data-template="template_7_2"] { grid-template-columns: repeat(3, 1fr); grid-template-rows: 2fr 1fr 1fr; }
+    [data-template="template_7_2"] .slot-1 { grid-column: span 3; }
+    
+    /* 8 Image Templates */
+    [data-template="template_8_1"] { grid-template-columns: repeat(4, 1fr); grid-template-rows: repeat(2, 1fr); }
+    [data-template="template_8_2"] { grid-template-columns: 2fr 1fr 1fr; grid-template-rows: 1fr 1fr 1fr; }
+    [data-template="template_8_2"] .slot-1 { grid-row: span 3; }
+
+    /* 9 Image Templates */
+    [data-template="template_9_1"] { grid-template-columns: repeat(3, 1fr); grid-template-rows: repeat(3, 1fr); }
+    [data-template="template_9_2"] { grid-template-columns: 1fr 2fr 1fr; grid-template-rows: 1fr 2fr 1fr; }
+    [data-template="template_9_2"] .slot-5 { grid-area: 2 / 2 / 3 / 3; }
+
+    /* 10 Image Templates */
+    [data-template="template_10_1"] { grid-template-columns: repeat(5, 1fr); grid-template-rows: repeat(2, 1fr); }
+    [data-template="template_10_2"] { grid-template-columns: repeat(4, 1fr); grid-template-rows: 2fr 1fr 1fr; }
+    [data-template="template_10_2"] .slot-1 { grid-column: span 2; }
+    [data-template="template_10_2"] .slot-2 { grid-column: span 2; }
+
+    /* 11 Image Templates */
+    [data-template="template_11_1"] { grid-template-columns: 1fr 1fr 1fr; grid-template-rows: 1fr 1fr 1fr 1fr; }
+    [data-template="template_11_1"] .slot-1 { grid-row: span 2; }
+    [data-template="template_11_1"] .slot-11 { grid-column: span 2; }
+    [data-template="template_11_2"] { grid-template-columns: 1fr 2fr 1fr; grid-template-rows: 1fr 2fr 1fr; }
+    [data-template="template_11_2"] .slot-2 { grid-row: span 2; }
+    [data-template="template_11_2"] .slot-8 { grid-row: span 2; }
+    [data-template="template_11_2"] .slot-5 { grid-area: 2 / 2 / 3 / 3; }
+
+    /* 12 Image Templates */
+    [data-template="template_12_1"] { grid-template-columns: repeat(4, 1fr); grid-template-rows: repeat(3, 1fr); }
+    [data-template="template_12_2"] { grid-template-columns: repeat(3, 1fr); grid-template-rows: repeat(4, 1fr); }
+
+    /* 13 Image Templates */
+    [data-template="template_13_1"] { grid-template-columns: 1fr 1fr 1fr 1fr; grid-template-rows: 1fr 2fr 1fr; }
+    [data-template="template_13_1"] .slot-6 { grid-column: 2 / span 2; grid-row: 2 / 3; }
+    [data-tmeplate="template_13_2"] { grid-template-columns: repeat(4, 1fr); grid-template-rows: 2fr repeat(3, 1fr); }
+    [data-template="template_13_2"] .slot-1 { grid-column: span 4; }
+
+    /* 14 Image Templates */
+    [data-template="template_14_1"] { grid-template-columns: repeat(7, 1fr); grid-template-rows: repeat(2, 1fr); }
+    [data-template="template_14_2"] { grid-template-columns: repeat(4, 1fr); grid-template-rows: repeat(4, 1fr); }
+    [data-template="template_14_2"] .slot-3 { grid-row: span 2; }
+    [data-template="template_14_2"] .slot-7 { grid-row: span 2; }
+    [data-template="template_14_2"] .slot-10 { grid-row: span 2; }
+    [data-template="template_14_2"] .slot-12 { grid-row: span 2; }
+
+    /* 15 Image Templates */
+    [data-template="template_15_1"] { grid-template-columns: repeat(5, 1fr); grid-template-rows: repeat(3, 1fr); }
+    [data-template="template_15_2"] { grid-template-columns: 2fr 1fr 1fr 1fr; grid-template-rows: 2fr 1fr 1fr; }
+    [data-template="template_15_2"] .slot-1 { grid-column: span 2; grid-row: span 2; }
+
+    /* Frame Styles */
+    .modern { border: none; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 3px; }
+    .modern .collage-template { background: white; border-radius: 8px; }
+    .classic { border: 8px solid #8b4513; background: #f4f1e8; box-shadow: inset 0 0 20px rgba(139, 69, 19, 0.3); }
+    .classic .image-slot { border: 2px solid #8b4513; }
+    .minimal { border: 1px solid #e0e0e0; background: #fafafa; }
+    .minimal .collage-template { padding: 15px; }
+    .vintage { border: 12px solid #d4af37; background: linear-gradient(45deg, #f7f3e9, #e8dcc0); position: relative; }
+    .vintage::before { content: ''; position: absolute; top: 8px; left: 8px; right: 8px; bottom: 8px; border: 2px solid #8b7355; pointer-events: none; }
+    .vintage .image-slot { filter: sepia(20%) contrast(1.1); }
+    
+    /* Responsive Design */
+    @media (max-width: 768px) {
+        .collage-template { padding: 15px; gap: 6px; }
+        [data-template="template_4_3"],
+        [data-template="template_8_1"],
+        [data-template="template_10_1"] { grid-template-columns: 1fr 1fr; }
+        [data-template="template_6_1"],
+        [data-template="template_12_1"] { grid-template-columns: 1fr 1fr; }
+        [data-template="template_14_1"] { grid-template-columns: 1fr 1fr 1fr; }
+        [data-template="template_15_1"] { grid-template-columns: 1fr 1fr 1fr; }
+    }
+    
+    @media (max-width: 480px) {
+        .collage-template { padding: 10px; gap: 4px; }
+        /* For the most complex grids, revert to a single column on mobile */
+        [data-template="template_3_1"],
+        [data-template="template_4_1"],
+        [data-template="template_6_1"],
+        [data-template="template_7_1"],
+        [data-template="template_7_2"],
+        [data-template="template_9_2"],
+        [data-template="template_11_2"],
+        [data-template="template_14_2"],
+        [data-template="template_15_2"] {
+            grid-template-columns: 1fr;
+            grid-template-rows: auto;
+        }
+        /* Reset any spanning on mobile */
+        [data-template] [class*="slot-"] {
+            grid-column: auto;
+            grid-row: auto;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <div class="row">
+        <div class="col-lg-8">
+            <h1 class="mb-0">{{ collage.title }}</h1>
+            <p class="text-muted small">
+                Template: {{ collage.template_id }} | 
+                Frame: {{ collage.get_frame_style_display }} | 
+                {{ collage.image_count }} images | 
+                Created: {{ collage.created_at|date:"M d, Y" }}
+            </p>
+            
+            <div class="collage-container {{ collage.frame_style }}" id="collage-container">
+                <div class="collage-template" data-template="{{ collage.template_id }}">
+                    {% for image in images %}
+                        <div class="image-slot slot-{{ forloop.counter }}">
+                            <img src="{{ image.image.url }}" alt="{{ image.caption|default:'Collage Image' }}" loading="lazy">
+                            {% if image.caption %}
+                                <div class="image-caption">{{ image.caption }}</div>
+                            {% endif %}
+                        </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-lg-4">
+            <div class="card shadow-sm sticky-top" style="top: 20px;">
+                <div class="card-header">
+                    <h5 class="mb-0">Actions</h5>
+                </div>
+                <div class="card-body">
+                    <button class="btn btn-success w-100 mb-2" onclick="downloadCollage()">
+                        <i class="bi bi-download me-2"></i>Download as PNG
+                    </button>
+                    <a href="{% url 'collages:list' %}" class="btn btn-secondary w-100">
+                        <i class="bi bi-arrow-left me-2"></i>Back to All Collages
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+<script>
+    function downloadCollage() {
+        const collageContainer = document.getElementById('collage-container');
+        const collageTitle = "{{ collage.title|slugify }}"; // Create a URL-safe filename
+
+        // Temporarily remove shadow for cleaner capture
+        const originalShadow = collageContainer.style.boxShadow;
+        collageContainer.style.boxShadow = 'none';
+
+        html2canvas(collageContainer, {
+            useCORS: true, // Important for external images
+            allowTaint: true,
+            scale: 2 // Render at 2x resolution for higher quality
+        }).then(canvas => {
+            // Restore shadow after capture
+            collageContainer.style.boxShadow = originalShadow;
+
+            const link = document.createElement('a');
+            link.download = `${collageTitle || 'collage'}.png`;
+            link.href = canvas.toDataURL('image/png');
+            link.click();
+        }).catch(err => {
+            console.error('oops, something went wrong!', err);
+            // Restore shadow even if there's an error
+            collageContainer.style.boxShadow = originalShadow;
+        });
+    }
+</script>
+{% endblock %}

@@ -1,0 +1,130 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}My Profile - Collage Editor{% endblock %}
+
+{% block extra_css %}
+<style>
+    /* Specific styles for the profile dashboard */
+    .profile-avatar {
+        width: 120px;
+        height: 120px;
+        border-radius: 50%;
+        object-fit: cover;
+        border: 4px solid #fff;
+        box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        margin-top: -60px; /* Pulls the avatar up to overlap the header */
+    }
+    .profile-header {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        height: 150px;
+        border-radius: 0.75rem 0.75rem 0 0;
+    }
+    .stat-card {
+        background-color: #fff;
+        border: 1px solid #dee2e6;
+        border-radius: 0.75rem;
+        padding: 1.5rem;
+        text-align: center;
+        transition: all 0.3s ease;
+        height: 100%; /* Make cards in a row equal height */
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+    }
+    .stat-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 8px 25px rgba(0, 0, 0, 0.08);
+        border-color: #0d6efd;
+    }
+    .stat-icon {
+        font-size: 2.5rem;
+        color: #0d6efd;
+        margin-bottom: 0.5rem;
+    }
+    .stat-number {
+        font-size: 2.5rem;
+        font-weight: 700;
+        line-height: 1.2;
+    }
+    .stat-label {
+        font-weight: 600;
+        color: #6c757d;
+        margin-top: 0.25rem;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid px-4 px-lg-5 fade-in">
+    <div class="row justify-content-center">
+        <div class="col-lg-10">
+            
+            <!-- Profile Header Card -->
+            <div class="card shadow-sm mb-4">
+                <div class="profile-header"></div>
+                <div class="card-body text-center pt-0">
+                    <img src="https://i.pravatar.cc/150?u={{ user.username }}" alt="User Avatar" class="profile-avatar">
+                    <h2 class="fw-bold mt-3 mb-1">{{ user.get_full_name|default:user.username }}</h2>
+                    <p class="text-muted">{{ user.email }}</p>
+                </div>
+            </div>
+
+            <!-- Statistics Section -->
+            <div class="card shadow-sm mb-4">
+                <div class="card-header bg-light border-0">
+                    <h5 class="mb-0 fw-bold"><i class="bi bi-bar-chart-line-fill me-2"></i>Your Statistics</h5>
+                </div>
+                <div class="card-body p-4">
+                    <div class="row g-4">
+                        <div class="col-md-4">
+                            <div class="stat-card">
+                                <div class="stat-icon"><i class="bi bi-grid-3x3-gap-fill"></i></div>
+                                <div class="stat-number">{{ total_collages }}</div>
+                                <div class="stat-label">Total Collages</div>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="stat-card">
+                                <div class="stat-icon"><i class="bi bi-images"></i></div>
+                                <div class="stat-number">{{ total_images }}</div>
+                                <div class="stat-label">Total Images Used</div>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="stat-card">
+                                <div class="stat-icon"><i class="bi bi-calendar-check"></i></div>
+                                <div class="stat-number">{{ recent_collages }}</div>
+                                <div class="stat-label">Collages This Month</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Actions Card -->
+            <div class="card shadow-sm">
+                <div class="card-header bg-light border-0">
+                    <h5 class="mb-0 fw-bold"><i class="bi bi-window-stack me-2"></i>What's Next?</h5>
+                </div>
+                <div class="card-body text-center p-4">
+                    {% if total_collages > 0 %}
+                        <p class="lead mb-4">Ready to get creative again?</p>
+                    {% else %}
+                        <p class="lead mb-4">You haven't created any collages yet. Let's start!</p>
+                    {% endif %}
+                    <div class="d-grid gap-2 d-sm-flex justify-content-sm-center">
+                        <a href="{% url 'collages:create' %}" class="btn btn-primary btn-lg px-4 gap-3">
+                            <i class="bi bi-plus-circle me-1"></i> Create a New Collage
+                        </a>
+                        <a href="{% url 'collages:list' %}" class="btn btn-outline-secondary btn-lg px-4">
+                            <i class="bi bi-collection-fill me-1"></i> View My Collages
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>
+{% endblock %}

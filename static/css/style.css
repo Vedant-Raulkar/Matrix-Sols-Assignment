@@ -1,0 +1,371 @@
+/* static/css/style.css */
+
+/* 1. General & Typography
+-------------------------------------------------- */
+body {
+    font-family: 'Inter', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background-color: #f8f9fa; /* Light grey for a soft, modern background */
+    color: #212529; /* Default text color */
+}
+
+/* Custom Scrollbar for a polished look */
+::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+}
+
+::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    border-radius: 10px;
+}
+
+::-webkit-scrollbar-thumb {
+    background: #ced4da;
+    border-radius: 10px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: #adb5bd;
+}
+
+
+/* 2. Layout & Structure
+-------------------------------------------------- */
+main {
+    padding-top: 1.5rem;
+    padding-bottom: 1.5rem;
+}
+
+footer {
+    margin-top: auto;
+    background-color: #ffffff;
+    border-top: 1px solid #dee2e6;
+}
+
+footer a.text-muted:hover {
+    text-decoration: underline !important;
+}
+
+
+/* 3. Navigation
+-------------------------------------------------- */
+.navbar {
+    transition: box-shadow 0.3s ease-in-out;
+}
+
+.navbar-brand {
+    font-size: 1.5rem;
+    font-weight: 700; /* Bolder for more impact */
+}
+
+.nav-link {
+    font-weight: 500;
+    color: #495057;
+    transition: color 0.3s ease;
+}
+
+.nav-link:hover, .nav-link.active {
+    color: #0d6efd; /* Bootstrap primary color */
+}
+
+.dropdown-menu {
+    border: none;
+    box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.1);
+    border-radius: 0.5rem; /* Softer radius */
+}
+
+.dropdown-item {
+    font-weight: 500;
+    transition: background-color 0.2s ease, color 0.2s ease;
+}
+
+.dropdown-item:hover {
+    background-color: #f8f9fa;
+    color: #0d6efd;
+}
+
+
+/* 4. Cards
+-------------------------------------------------- */
+.card {
+    border: none;
+    border-radius: 0.75rem; /* Slightly larger radius for a modern feel */
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.05);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.card:hover {
+    transform: translateY(-5px); /* More noticeable lift effect */
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+}
+
+.card-img-top {
+    border-top-left-radius: 0.75rem;
+    border-top-right-radius: 0.75rem;
+    height: 200px;
+    object-fit: cover;
+}
+
+
+/* 5. Buttons
+-------------------------------------------------- */
+.btn {
+    border-radius: 0.375rem; /* Standard Bootstrap radius */
+    padding: 10px 20px;
+    font-weight: 600; /* Semi-bold for better readability */
+    transition: all 0.3s ease;
+}
+
+.btn-primary {
+    background-color: #0d6efd;
+    border-color: #0d6efd;
+}
+
+.btn-primary:hover {
+    background-color: #0b5ed7;
+    border-color: #0a58ca;
+    transform: translateY(-2px);
+}
+
+/* Removing gradients for a cleaner, more modern "flat" design */
+.btn-warning {
+    background-color: #ffc107;
+    border-color: #ffc107;
+    color: #000;
+}
+
+.btn-danger {
+    background-color: #dc3545;
+    border-color: #dc3545;
+}
+
+.btn-success {
+    background-color: #198754;
+    border-color: #198754;
+}
+
+
+/* 6. Forms & Inputs
+-------------------------------------------------- */
+.form-label {
+    font-weight: 600; /* Bolder labels */
+    margin-bottom: 0.5rem;
+    color: #495057;
+}
+
+.form-control {
+    border-radius: 0.375rem;
+    border: 1px solid #dee2e6;
+    padding: 12px;
+    transition: border-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+.form-control:focus {
+    border-color: #0d6efd;
+    box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.25);
+}
+
+.search-box {
+    position: relative;
+}
+
+.search-box .form-control {
+    padding-right: 40px;
+}
+
+.search-box .search-btn {
+    position: absolute;
+    right: 10px;
+    top: 50%;
+    transform: translateY(-50%);
+    background: none;
+    border: none;
+    color: #6c757d;
+}
+
+
+/* 7. Alerts & Messages
+-------------------------------------------------- */
+.alert {
+    border-radius: 0.5rem;
+    border-width: 0;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    /* Using solid colors instead of gradients for a cleaner look */
+}
+
+.alert-success { background-color: #d1e7dd; color: #0f5132; }
+.alert-danger { background-color: #f8d7da; color: #842029; }
+.alert-warning { background-color: #fff3cd; color: #664d03; }
+.alert-info { background-color: #cff4fc; color: #055160; }
+
+
+/* 8. Collage Specific Styles
+-------------------------------------------------- */
+.collage-container {
+    background: white;
+    border-radius: 0.75rem;
+    padding: 2rem; /* More padding */
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.05);
+    margin-bottom: 2rem;
+}
+
+.collage-actions {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
+.collage-actions .btn {
+    flex: 1;
+    min-width: 120px;
+}
+
+/* Layouts */
+.grid-layout {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 1rem;
+}
+
+.grid-layout img {
+    width: 100%;
+    height: 200px;
+    object-fit: cover;
+    border-radius: 0.5rem;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.grid-layout img:hover {
+    transform: scale(1.05);
+    box-shadow: 0 8px 16px rgba(0,0,0,0.2);
+}
+
+.masonry-layout {
+    column-count: 3;
+    column-gap: 1rem;
+}
+
+.masonry-layout img {
+    width: 100%;
+    margin-bottom: 1rem;
+    border-radius: 0.5rem;
+    break-inside: avoid;
+    transition: transform 0.3s ease;
+}
+
+.masonry-layout img:hover {
+    transform: scale(1.02);
+}
+
+.freeform-layout {
+    position: relative;
+    min-height: 500px;
+    background: #e9ecef; /* A simple, neutral background */
+    border-radius: 0.75rem;
+    overflow: hidden;
+}
+
+.freeform-image {
+    position: absolute;
+    border: 3px solid #fff;
+    border-radius: 0.5rem;
+    cursor: move;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+.freeform-image:hover {
+    transform: scale(1.05);
+    z-index: 10;
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.3);
+}
+
+
+/* 9. Components (Pagination, Uploads, etc.)
+-------------------------------------------------- */
+.pagination .page-link {
+    border-radius: 0.375rem;
+    margin: 0 3px;
+    border: 1px solid #dee2e6;
+    color: #0d6efd;
+}
+
+.pagination .page-item.active .page-link {
+    background-color: #0d6efd;
+    border-color: #0d6efd;
+    color: #fff;
+}
+
+.image-upload-preview {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-top: 15px;
+}
+
+.image-upload-preview img {
+    width: 100px;
+    height: 100px;
+    object-fit: cover;
+    border-radius: 0.375rem;
+    border: 2px solid #dee2e6;
+}
+
+.drag-over {
+    background-color: #e9f3ff;
+    border: 2px dashed #0d6efd;
+}
+
+.dragging {
+    opacity: 0.4;
+}
+
+
+/* 10. Animations & Utilities
+-------------------------------------------------- */
+.fade-in {
+    animation: fadeIn 0.5s ease-in-out;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(15px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.loading-spinner {
+    display: inline-block;
+    width: 24px;
+    height: 24px;
+    border: 3px solid rgba(13, 110, 253, 0.3);
+    border-top-color: #0d6efd;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    to { transform: rotate(360deg); }
+}
+
+
+/* 11. Responsive Design
+-------------------------------------------------- */
+@media (max-width: 768px) {
+    .masonry-layout {
+        column-count: 2;
+    }
+    .grid-layout {
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    }
+}
+
+@media (max-width: 480px) {
+    .masonry-layout {
+        column-count: 1;
+    }
+    .grid-layout {
+        grid-template-columns: 1fr;
+    }
+    .freeform-layout {
+        min-height: 300px;
+    }
+}
